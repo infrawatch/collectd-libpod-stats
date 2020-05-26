@@ -13,7 +13,7 @@ retrieving container information is quick. In podman, the varlink GetContainer()
 in depth analysis on the container filesystem and when sizes are large, this can take a substantial
 amount of time.
 */
-package container
+package containers
 
 import (
 	"encoding/json"
@@ -31,9 +31,9 @@ type Container struct {
 	Created string   `json:"created"`
 }
 
-// NewListFromJSON create map[container.ID]*Container from json data
+// NewMapFromJSON create map[container.ID]*Container from json data
 // data is expected to be in the format of podman's containers.json
-func NewListFromJSON(data json.RawMessage) (List, error) {
+func NewMapFromJSON(data json.RawMessage) (List, error) {
 	dataList := []json.RawMessage{}
 	cMap := make(List)
 	err := json.Unmarshal(data, &dataList)

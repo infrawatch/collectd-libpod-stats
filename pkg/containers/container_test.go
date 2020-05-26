@@ -1,10 +1,10 @@
-package container
+package containers
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/pleimer/collectd-podman-stats/pkg/assert"
+	"github.com/pleimer/collectd-libpod-stats/pkg/assert"
 )
 
 func TestListCreation(t *testing.T) {
@@ -20,7 +20,7 @@ func TestListCreation(t *testing.T) {
 	assert.Ok(t, err)
 
 	t.Run("normal operation", func(t *testing.T) {
-		mUT, err := NewListFromJSON(cListJSON)
+		mUT, err := NewMapFromJSON(cListJSON)
 		assert.Ok(t, err)
 
 		std := List{
@@ -34,7 +34,7 @@ func TestListCreation(t *testing.T) {
 		badJSON := cListJSON
 		badJSON = append(badJSON, []byte{130}...)
 
-		_, err := NewListFromJSON(badJSON)
+		_, err := NewMapFromJSON(badJSON)
 		assert.Assert(t, (err != nil), "expected a json error")
 	})
 
@@ -42,7 +42,7 @@ func TestListCreation(t *testing.T) {
 		cJSON, err := json.Marshal(c)
 		assert.Ok(t, err)
 
-		_, err = NewListFromJSON(cJSON)
+		_, err = NewMapFromJSON(cJSON)
 		assert.Assert(t, (err != nil), "expected a json error")
 	})
 
@@ -52,7 +52,7 @@ func TestListCreation(t *testing.T) {
 		badIDJSON, err := json.Marshal(badID)
 		assert.Ok(t, err)
 
-		_, err = NewListFromJSON(badIDJSON)
+		_, err = NewMapFromJSON(badIDJSON)
 		assert.Assert(t, (err != nil), "expected invalid ID error")
 	})
 }

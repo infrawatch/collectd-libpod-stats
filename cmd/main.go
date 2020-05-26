@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/collectd/go-collectd/plugin"
-	stats "github.com/pleimer/collectd-podman-stats/pkg"
+	"github.com/pleimer/collectd-libpod-stats/pkg/stats"
 )
 
 func init() {
 	plugin.RegisterRead("podmanstats", stats.PodmanStats{})
-	plugin.RegisterConfig("Service", stats.Service{})
+	//plugin.RegisterConfig("Service", stats.Service{})
 }
 
 func main() {}

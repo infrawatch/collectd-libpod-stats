@@ -1,10 +1,4 @@
-/*Package cgroup includes objects and functions for interfacing with cgroups on the host OS
-
-As of 22 May 2020, there exist only two
-1. v1 (<= RHEL7/Fedora30/CentOS7)
-2. v2 (>= RHEL8/Fedora31/CentOS8)
-*/
-package cgroup
+package cgroups
 
 import (
 	"bufio"
@@ -13,44 +7,29 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
-	"syscall"
 
 	"github.com/pkg/errors"
-	"golang.org/x/sys/unix"
 )
 
 const (
 	cgroupRoot = "/sys/fs/cgroup"
-	// CPU is the cpu controller
-	CPU = "cpu"
-	// CPUAcct is the cpuacct controller
-	CPUAcct = "cpuacct"
-	// Memory is the memory controller
-	Memory = "memory"
 )
 
-//Cgroup represents a cgroup version
-type Cgroup interface {
+//ControlType supported cgroup controller types
+type ControlType int
+
+const (
+	CPUAcctT ControlType = iota
+	MemoryT
+)
+
+func (ct ControlType) String() string {
+	return []string{"cpuacct", "memory"}[ct]
 }
 
-var (
-	isUnifiedOnce sync.Once
-	isUnified     bool
-	isUnifiedErr  error
-)
-
-// IsCgroup2UnifiedMode returns whether we are running in cgroup 2 cgroup2 mode.
-func IsCgroup2UnifiedMode() (bool, error) {
-	isUnifiedOnce.Do(func() {
-		var st syscall.Statfs_t
-		if err := syscall.Statfs("/sys/fs/cgroup", &st); err != nil {
-			isUnified, isUnifiedErr = false, err
-		} else {
-			isUnified, isUnifiedErr = st.Type == unix.CGROUP2_SUPER_MAGIC, nil
-		}
-	})
-	return isUnified, isUnifiedErr
+//CgroupControl represents a cgroup controller
+type CgroupControl interface {
+	Stats() ([]byte, error)
 }
 
 func readFileAsUint64(path string) (uint64, error) {

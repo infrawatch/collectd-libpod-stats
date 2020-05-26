@@ -6,24 +6,23 @@ import (
 	"time"
 
 	"collectd.org/api"
-	"github.com/collectd/go-collectd/config"
 	"github.com/collectd/go-collectd/plugin"
 )
 
 type Service struct {
 }
 
-func (Service) Configure(ctx context.Context, block config.Block) error {
-	configMap := make(map[string]interface{})
-	err := block.Unmarshal(&configMap)
-	if err != nil {
-		return err
-	}
-	for key, val := range configMap {
-		fmt.Printf("%s:%s\n", key, val)
-	}
-	return nil
-}
+// func (Service) Configure(ctx context.Context, block config.Block) error {
+// 	configMap := make(map[string]interface{})
+// 	err := block.Unmarshal(&configMap)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for key, val := range configMap {
+// 		fmt.Printf("%s:%s\n", key, val)
+// 	}
+// 	return nil
+// }
 
 // PodmanStats gather container stats from podman
 type PodmanStats struct{}

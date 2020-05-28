@@ -20,12 +20,10 @@ func TestListCreation(t *testing.T) {
 	assert.Ok(t, err)
 
 	t.Run("normal operation", func(t *testing.T) {
-		mUT, err := NewMapFromJSON(cListJSON)
+		mUT, err := NewListFromJSON(cListJSON)
 		assert.Ok(t, err)
 
-		std := List{
-			c.ID: &c,
-		}
+		std := []*Container{&c}
 
 		assert.Equals(t, std, mUT)
 	})
@@ -34,7 +32,7 @@ func TestListCreation(t *testing.T) {
 		badJSON := cListJSON
 		badJSON = append(badJSON, []byte{130}...)
 
-		_, err := NewMapFromJSON(badJSON)
+		_, err := NewListFromJSON(badJSON)
 		assert.Assert(t, (err != nil), "expected a json error")
 	})
 
@@ -42,7 +40,7 @@ func TestListCreation(t *testing.T) {
 		cJSON, err := json.Marshal(c)
 		assert.Ok(t, err)
 
-		_, err = NewMapFromJSON(cJSON)
+		_, err = NewListFromJSON(cJSON)
 		assert.Assert(t, (err != nil), "expected a json error")
 	})
 
@@ -52,7 +50,7 @@ func TestListCreation(t *testing.T) {
 		badIDJSON, err := json.Marshal(badID)
 		assert.Ok(t, err)
 
-		_, err = NewMapFromJSON(badIDJSON)
+		_, err = NewListFromJSON(badIDJSON)
 		assert.Assert(t, (err != nil), "expected invalid ID error")
 	})
 }

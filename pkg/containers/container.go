@@ -20,9 +20,6 @@ import (
 	"fmt"
 )
 
-//List represents all containers running or paused in Podman
-type List map[string]*Container
-
 //Container represents a container within Podman
 type Container struct {
 	Names   []string `json:"names"`
@@ -31,11 +28,11 @@ type Container struct {
 	Created string   `json:"created"`
 }
 
-// NewMapFromJSON create map[container.ID]*Container from json data
+// NewListFromJSON create map[container.ID]*Container from json data
 // data is expected to be in the format of podman's containers.json
-func NewMapFromJSON(data json.RawMessage) (List, error) {
+func NewListFromJSON(data json.RawMessage) ([]*Container, error) {
 	dataList := []json.RawMessage{}
-	cMap := make(List)
+	cList := []*Container{}
 	err := json.Unmarshal(data, &dataList)
 	if err != nil {
 		return nil, &Error{
@@ -60,10 +57,10 @@ func NewMapFromJSON(data json.RawMessage) (List, error) {
 			}
 		}
 
-		cMap[c.ID] = &c
+		cList = append(cList, &c)
 	}
 
-	return cMap, nil
+	return cList, nil
 }
 
 //Error error type for all container function failures

@@ -1,4 +1,4 @@
-package stats
+package main
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 
 	"collectd.org/api"
 	"github.com/collectd/go-collectd/plugin"
+	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
+	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
 )
 
 type Service struct {
@@ -24,19 +26,23 @@ type Service struct {
 // 	return nil
 // }
 
-// PodmanStats gather container stats from podman
-type PodmanStats struct{}
+// LibpodStats gather container stats from podman
+type LibpodStats struct{}
 
-func (PodmanStats) Read(ctx context.Context) error {
+func (LibpodStats) Read(ctx context.Context) error {
+	statMatrix, err := virt.ContainersStats(cgroups.CPUAcctT)
+	if err != nil {
+		return err
+	}
 	vl := &api.ValueList{
 		Identifier: api.Identifier{
 			Host:   "localhost",
-			Plugin: "podmanstats",
+			Plugin: "libpodstats",
 			Type:   "gauge",
 		},
 		Time:     time.Now(),
 		Interval: 10 * time.Second,
-		Values:   []api.Value{api.Gauge(42)},
+		Values:   []api.Value{api.Counter(statMatrix["qdr"][cgroups.CPUAcctT])},
 		DSNames:  []string{"value"},
 	}
 

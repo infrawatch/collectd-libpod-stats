@@ -29,9 +29,27 @@ func (ct ControlType) String() string {
 
 //CgroupControl represents a cgroup controller
 type CgroupControl interface {
-	Stats() ([]byte, error)
+	Stats() (uint64, error)
 }
 
+//CgroupControlFactory generates CgroupControl type based on specified type
+func CgroupControlFactory(ct ControlType, path string) (CgroupControl, error) {
+	var cgc CgroupControl
+	var err error
+
+	switch ct {
+	case CPUAcctT:
+		cgc, err = NewCPUAcct(path)
+	case MemoryT:
+		cgc, err = NewMemory(path)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return cgc, nil
+}
+
+// -------------- helper functions ----------------
 func readFileAsUint64(path string) (uint64, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {

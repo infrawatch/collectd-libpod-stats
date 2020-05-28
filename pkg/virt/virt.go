@@ -23,12 +23,50 @@ const (
 	//container path relative to user
 	relativeContainersPath string = "containers/storage/overlay-containers/containers.json"
 
-	//container cgroup name template determined by libpod
+	//libpod cgroup name template
 	containerCgroupTemplate string = "libpod-%s.scope"
 )
 
-//GetContainers retrieves all containers created on host
-func GetContainers() (map[string]*containers.Container, error) {
+//MetricMatrix holds stats for each container according to
+//control type
+type MetricMatrix map[string]map[cgroups.ControlType]uint64
+
+//ContainersStats retrieves stats in specified cgroup controllers for all containers on host
+func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error) {
+	retMatrix := MetricMatrix{}
+
+	cMap, err := getContainers()
+	if err != nil {
+		return nil, errors.Wrap(err, "retrieving host containers")
+	}
+
+	for cLabel, c := range cMap {
+		retMatrix[cLabel] = map[cgroups.ControlType]uint64{}
+		for _, control := range cgroupControls {
+			ctrlPath, err := genContainerCgroupPath(control, c.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			cgCtrl, err := cgroups.CgroupControlFactory(control, ctrlPath)
+			if err != nil {
+				return nil, err
+			}
+
+			stat, err := cgCtrl.Stats()
+			if err != nil {
+				return nil, err
+			}
+
+			retMatrix[cLabel][control] = stat
+		}
+	}
+	return retMatrix, nil
+}
+
+//getContainers returns map with containers created on host indexed by
+//ID and name
+func getContainers() (map[string]*containers.Container, error) {
 	/*
 		libpod stores container related information in one of two places:
 		1. /var/lib/containers/storage/overlay-containers (root)
@@ -51,31 +89,20 @@ func GetContainers() (map[string]*containers.Container, error) {
 		return nil, errors.Wrap(err, "reading libpod container file")
 	}
 
-	containerMap, err := containers.NewMapFromJSON(containersJSON)
+	containerList, err := containers.NewListFromJSON(containersJSON)
 	if err != nil {
 		return nil, errors.Wrap(err, "loading container json")
 	}
 
+	containerMap := make(map[string]*containers.Container)
+	for _, c := range containerList {
+		containerMap[c.ID] = c
+		for _, name := range c.Names {
+			containerMap[name] = c
+		}
+	}
+
 	return containerMap, nil
-}
-
-//ContainerStats retrieves stats for container with ID
-func ContainerStats(ID string) ([]byte, error) {
-	cpuPath, err := genContainerCgroupPath(cgroups.CPUAcctT, ID)
-	if err != nil {
-		return nil, err
-	}
-
-	cgCtrl, err := cgroups.NewCPUAcct(cpuPath)
-	if err != nil {
-		return nil, err
-	}
-
-	stats, err := cgCtrl.Stats()
-	if err != nil {
-		return nil, fmt.Errorf("container %s not running", ID)
-	}
-	return stats, nil
 }
 
 func genContainerCgroupPath(ctype cgroups.ControlType, id string) (string, error) {

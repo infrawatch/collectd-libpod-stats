@@ -15,6 +15,10 @@ const (
 	cgroupRoot = "/sys/fs/cgroup"
 )
 
+var (
+	ErrUndefinedController error = errors.New("undefined controller type")
+)
+
 //ControlType supported cgroup controller types
 type ControlType int
 
@@ -42,6 +46,8 @@ func CgroupControlFactory(ct ControlType, path string) (CgroupControl, error) {
 		cgc, err = NewCPUAcct(path)
 	case MemoryT:
 		cgc, err = NewMemory(path)
+	default:
+		err = ErrUndefinedController
 	}
 	if err != nil {
 		return nil, err

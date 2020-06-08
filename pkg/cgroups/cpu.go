@@ -60,6 +60,7 @@ func (ca *CPUAcct) statsV2() (uint64, error) {
 		}
 		total += v * 1000
 	}
+
 	return total, nil
 }
 

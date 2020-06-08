@@ -64,8 +64,7 @@ func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error
 	return retMatrix, nil
 }
 
-//getContainers returns map with containers created on host indexed by
-//ID and name
+//getContainers returns map with containers created on host indexed by name
 func getContainers() (map[string]*containers.Container, error) {
 	/*
 		libpod stores container related information in one of two places:
@@ -96,7 +95,6 @@ func getContainers() (map[string]*containers.Container, error) {
 
 	containerMap := make(map[string]*containers.Container)
 	for _, c := range containerList {
-		containerMap[c.ID] = c
 		for _, name := range c.Names {
 			containerMap[name] = c
 		}

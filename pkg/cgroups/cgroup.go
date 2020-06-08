@@ -24,7 +24,7 @@ const (
 )
 
 func (ct ControlType) String() string {
-	return []string{"cpuacct", "memory"}[ct]
+	return []string{"cpu", "memory"}[ct]
 }
 
 //CgroupControl represents a cgroup controller

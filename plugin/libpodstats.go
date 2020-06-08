@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"collectd.org/api"
+	"collectd.org/exec"
 	"github.com/collectd/go-collectd/plugin"
 	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
 	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
@@ -30,27 +31,30 @@ type Service struct {
 type LibpodStats struct{}
 
 func (LibpodStats) Read(ctx context.Context) error {
-	statMatrix, err := virt.ContainersStats(cgroups.CPUAcctT)
+	statMatrix, err := virt.ContainersStats(cgroups.CPUAcctT, cgroups.MemoryT)
 	if err != nil {
 		return err
 	}
-	vl := &api.ValueList{
-		Identifier: api.Identifier{
-			Host:   "localhost",
-			Plugin: "libpodstats",
-			Type:   "gauge",
-		},
-		Time:     time.Now(),
-		Interval: 10 * time.Second,
-		Values:   []api.Value{api.Counter(statMatrix["qdr"][cgroups.CPUAcctT])},
-		DSNames:  []string{"value"},
+
+	for cName, metric := range statMatrix {
+		var vl *api.ValueList
+		for controller, stat := range metric {
+			vl = &api.ValueList{
+				Identifier: api.Identifier{
+					Host:           exec.Hostname(),
+					Plugin:         "libpodstats",
+					PluginInstance: cName,
+					Type:           controller.String(),
+				},
+				Time:     time.Now(),
+				Interval: 10 * time.Second,
+				Values:   []api.Value{api.Gauge(stat)},
+			}
+
+			if err := plugin.Write(ctx, vl); err != nil {
+				return fmt.Errorf("plugin.Write: %w", err)
+			}
+		}
 	}
-
-	plugin.Info("I REALLY tried to execute this plugin")
-
-	if err := plugin.Write(ctx, vl); err != nil {
-		return fmt.Errorf("plugin.Write: %w", err)
-	}
-
 	return nil
 }

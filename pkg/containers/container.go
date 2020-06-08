@@ -28,8 +28,8 @@ type Container struct {
 	Created string   `json:"created"`
 }
 
-// NewListFromJSON create map[container.ID]*Container from json data
-// data is expected to be in the format of podman's containers.json
+// NewListFromJSON unmarshal json container list
+// data is expected to be in the format of libpod's containers.json
 func NewListFromJSON(data json.RawMessage) ([]*Container, error) {
 	dataList := []json.RawMessage{}
 	cList := []*Container{}

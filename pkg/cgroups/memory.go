@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"collectd.org/api"
 	"github.com/pkg/errors"
 )
 
@@ -30,33 +31,34 @@ func NewMemory(path string) (*Memory, error) {
 }
 
 //Stats get memory stats
-func (m *Memory) Stats() (uint64, error) {
+func (m *Memory) Stats() (api.Value, error) {
 	if m.cgroup2 {
 		return m.statsV2()
 	}
 	return m.statsV1()
 }
 
-func (m *Memory) statsV1() (uint64, error) {
+func (m *Memory) statsV1() (api.Value, error) {
 	res, err := readFileAsUint64(filepath.Join(m.path, "memory.usage_in_bytes"))
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving memory stats cgroup v1")
+		return nil, errors.Wrapf(err, "retrieving memory stats cgroup v1")
 	}
-	return res, nil
+	return api.Gauge(res), nil
 }
 
-func (m *Memory) statsV2() (uint64, error) {
+func (m *Memory) statsV2() (api.Value, error) {
 	p := filepath.Join(m.path, "memory.current")
 
 	stat, err := ioutil.ReadFile(p)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	ret, err := strconv.Atoi(strings.TrimSpace(string(stat)))
 
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving memory stats cgroup v2")
+		return nil, errors.Wrapf(err, "retrieving memory stats cgroup v2")
 	}
-	return uint64(ret), nil
+
+	return api.Gauge(ret), nil
 }

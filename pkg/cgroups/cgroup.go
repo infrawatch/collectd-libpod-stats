@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"collectd.org/api"
 	"github.com/pkg/errors"
 )
 
@@ -33,7 +34,7 @@ func (ct ControlType) String() string {
 
 //CgroupControl represents a cgroup controller
 type CgroupControl interface {
-	Stats() (uint64, error)
+	Stats() (api.Value, error)
 }
 
 //CgroupControlFactory generates CgroupControl type based on specified type

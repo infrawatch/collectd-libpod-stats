@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"collectd.org/api"
 	"github.com/pkg/errors"
 )
 
@@ -29,39 +30,40 @@ func NewCPUAcct(path string) (*CPUAcct, error) {
 }
 
 //Stats get cpuacct stats
-func (ca *CPUAcct) Stats() (uint64, error) {
+func (ca *CPUAcct) Stats() (api.Value, error) {
 	if ca.cgroup2 {
 		return ca.statsV2()
 	}
 	return ca.statsV1()
 }
 
-func (ca *CPUAcct) statsV1() (uint64, error) {
+func (ca *CPUAcct) statsV1() (api.Value, error) {
 	res, err := readFileAsUint64(filepath.Join(ca.path, "cpuacct.usage"))
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving cpu stats cgroup v1")
+		return nil, errors.Wrapf(err, "retrieving cpu stats cgroup v1")
 	}
-	return res, nil
+	return api.Counter(res), nil
 }
 
-func (ca *CPUAcct) statsV2() (uint64, error) {
+func (ca *CPUAcct) statsV2() (api.Value, error) {
 	p := filepath.Join(ca.path, "cpu.stat")
 
 	values, err := readCgroup2MapPath(p)
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving cpu stats cgroup v2")
+		return nil, errors.Wrapf(err, "retrieving cpu stats cgroup v2")
 	}
 
 	var total uint64
 	if val, found := values["usage_usec"]; found {
 		v, err := strconv.ParseUint(cleanString(val[0]), 10, 0)
+
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
 		total += v * 1000
 	}
 
-	return total, nil
+	return api.Counter(total), nil
 }
 
 // GetSystemCPUUsage returns the system usage for all the cgroups

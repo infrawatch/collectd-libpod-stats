@@ -39,6 +39,7 @@ func (LibpodStats) Read(ctx context.Context) error {
 	for cName, metric := range statMatrix {
 		var vl *api.ValueList
 		for controller, stat := range metric {
+			fmt.Printf("Controller: %s, stat: %d\n", controller, stat)
 			vl = &api.ValueList{
 				Identifier: api.Identifier{
 					Host:           exec.Hostname(),
@@ -48,7 +49,7 @@ func (LibpodStats) Read(ctx context.Context) error {
 				},
 				Time:     time.Now(),
 				Interval: 10 * time.Second,
-				Values:   []api.Value{api.Gauge(stat)},
+				Values:   []api.Value{stat},
 			}
 
 			if err := plugin.Write(ctx, vl); err != nil {

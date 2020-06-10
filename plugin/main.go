@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	plugin.RegisterRead("libpodstats", LibpodStats{})
+	plugin.RegisterRead("libpodstats", NewLibpodStats())
 	//plugin.RegisterConfig("Service", stats.Service{})
 }
 

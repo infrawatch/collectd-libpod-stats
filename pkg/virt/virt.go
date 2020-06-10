@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"collectd.org/api"
 	"github.com/pkg/errors"
 	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
 	"github.com/pleimer/collectd-libpod-stats/pkg/containers"
@@ -29,8 +28,8 @@ const (
 )
 
 //MetricMatrix holds stats for each container according to
-//control type
-type MetricMatrix map[string]map[cgroups.ControlType]api.Value
+//control type. Usage is: map[container label]map[control type]data
+type MetricMatrix map[string]map[cgroups.ControlType]uint64
 
 //ContainersStats retrieves stats in specified cgroup controllers for all containers on host
 func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error) {
@@ -42,7 +41,7 @@ func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error
 	}
 
 	for cLabel, c := range cMap {
-		retMatrix[cLabel] = map[cgroups.ControlType]api.Value{}
+		retMatrix[cLabel] = map[cgroups.ControlType]uint64{}
 		for _, control := range cgroupControls {
 			ctrlPath, err := genContainerCgroupPath(control, c.ID)
 			if err != nil {

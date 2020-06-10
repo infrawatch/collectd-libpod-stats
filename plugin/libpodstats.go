@@ -12,8 +12,8 @@ import (
 	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
 )
 
-type Service struct {
-}
+// type Service struct {
+// }
 
 // func (Service) Configure(ctx context.Context, block config.Block) error {
 // 	configMap := make(map[string]interface{})
@@ -28,29 +28,44 @@ type Service struct {
 // }
 
 // LibpodStats gather container stats from podman
-type LibpodStats struct{}
+type LibpodStats struct {
+	handlers map[cgroups.ControlType]handler
+}
 
-func (LibpodStats) Read(ctx context.Context) error {
+//NewLibpodStats initialize new libpodstats plugins with handlers
+//TODO: generate handlers from plugin config
+func NewLibpodStats() *LibpodStats {
+	handlers := map[cgroups.ControlType]handler{}
+
+	handlers[cgroups.CPUAcctT] = &cpuHandler{}
+	handlers[cgroups.MemoryT] = &memoryHandler{}
+	return &LibpodStats{
+		handlers: handlers,
+	}
+}
+
+func (ls *LibpodStats) Read(ctx context.Context) error {
 	statMatrix, err := virt.ContainersStats(cgroups.CPUAcctT, cgroups.MemoryT)
 	if err != nil {
 		return err
 	}
 
-	for cName, metric := range statMatrix {
-		var vl *api.ValueList
-		for controller, stat := range metric {
-			fmt.Printf("Controller: %s, stat: %d\n", controller, stat)
-			vl = &api.ValueList{
+	for cLabel, metric := range statMatrix {
+		for controlType, stat := range metric {
+			vl := &api.ValueList{
 				Identifier: api.Identifier{
 					Host:           exec.Hostname(),
 					Plugin:         "libpodstats",
-					PluginInstance: cName,
-					Type:           controller.String(),
+					PluginInstance: cLabel,
 				},
 				Time:     time.Now(),
 				Interval: 10 * time.Second,
-				Values:   []api.Value{stat},
 			}
+
+			if _, found := ls.handlers[controlType]; !found {
+				return fmt.Errorf("unhandled cgroup type: %s", controlType.String())
+			}
+			ls.handlers[controlType].populateValueList(stat, vl)
 
 			if err := plugin.Write(ctx, vl); err != nil {
 				return fmt.Errorf("plugin.Write: %w", err)

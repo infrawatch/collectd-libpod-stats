@@ -1,12 +1,11 @@
 package main
 
 import (
-	"github.com/collectd/go-collectd/plugin"
+	"collectd.org/plugin"
 )
 
 func init() {
-	plugin.RegisterRead("libpodstats", LibpodStats{})
-	//plugin.RegisterConfig("Service", stats.Service{})
+	plugin.RegisterRead("libpodstats", NewLibpodStats())
 }
 
 func main() {}

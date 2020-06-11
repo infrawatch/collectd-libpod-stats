@@ -54,13 +54,15 @@ func (ca *CPUAcct) statsV2() (uint64, error) {
 
 	var total uint64
 	if val, found := values["usage_usec"]; found {
-		v, err := strconv.ParseUint(cleanString(val[0]), 10, 0)
+		total, err = strconv.ParseUint(cleanString(val[0]), 10, 0)
+
 		if err != nil {
 			return 0, err
 		}
-		total += v * 1000
 	}
-	return total, nil
+
+	// cgroup V2 reports in microseconds - convert to nS precision
+	return total * 1000, nil
 }
 
 // GetSystemCPUUsage returns the system usage for all the cgroups
@@ -91,11 +93,10 @@ func GetSystemCPUUsage() (uint64, error) {
 		}
 
 		if val, found := values["usage_usec"]; found {
-			v, err := strconv.ParseUint(cleanString(val[0]), 10, 0)
+			total, err = strconv.ParseUint(cleanString(val[0]), 10, 0)
 			if err != nil {
 				return 0, err
 			}
-			total += v * 1000
 		}
 
 	}

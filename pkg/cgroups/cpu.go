@@ -61,7 +61,8 @@ func (ca *CPUAcct) statsV2() (uint64, error) {
 		}
 	}
 
-	return total, nil
+	// cgroup V2 reports in microseconds - convert to nS precision
+	return total * 1000, nil
 }
 
 // GetSystemCPUUsage returns the system usage for all the cgroups

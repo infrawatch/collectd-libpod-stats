@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"collectd.org/api"
@@ -37,11 +36,9 @@ func (ch *cpuHandler) populateValueList(cpuTime uint64, vl *api.ValueList) {
 	cpuDelta := float64(cpuTime - ch.prevStats[vl.PluginInstance].cpuTime)
 	systemDelta := float64((systemTime - ch.prevStats[vl.PluginInstance].systemTime))
 
-	if cpuDelta > 0.0 && systemDelta > 0.0 {
-		cpuPercent = (cpuDelta / systemDelta)
+	if cpuDelta > 0.0 && systemDelta > 0.0 && ch.prevStats[vl.PluginInstance] != (pair{}) {
+		cpuPercent = (cpuDelta / systemDelta) * 100.0
 	}
-
-	fmt.Printf("%s: cpu before: %d, cpu now: %d, system before: %d, system now: %d, usage: %f\n", vl.PluginInstance, ch.prevStats[vl.PluginInstance].systemTime, cpuTime, ch.prevStats[vl.PluginInstance].systemTime, systemTime, cpuDelta)
 
 	ch.prevStats[vl.PluginInstance] = pair{
 		systemTime: systemTime,

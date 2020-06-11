@@ -6,26 +6,30 @@ import (
 	"time"
 
 	"collectd.org/api"
+	"collectd.org/config"
 	"collectd.org/exec"
-	"github.com/collectd/go-collectd/plugin"
+	"collectd.org/plugin"
 	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
 	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
 )
 
-// type Service struct {
-// }
+type Configuration struct {
+}
 
-// func (Service) Configure(ctx context.Context, block config.Block) error {
-// 	configMap := make(map[string]interface{})
-// 	err := block.Unmarshal(&configMap)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	for key, val := range configMap {
-// 		fmt.Printf("%s:%s\n", key, val)
-// 	}
-// 	return nil
-// }
+func (Configuration) Configure(ctx context.Context, block config.Block) error {
+	fmt.Println("called configuration function")
+	// configMap := make(map[string]interface{})
+	// err := block.Unmarshal(&configMap)
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println("configmap: ")
+	// fmt.Println(configMap)
+	// for key, val := range configMap {
+	// 	fmt.Printf("%s:%s\n", key, val)
+	// }
+	return nil
+}
 
 // LibpodStats gather container stats from podman
 type LibpodStats struct {

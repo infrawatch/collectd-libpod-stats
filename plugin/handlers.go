@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"collectd.org/api"
@@ -30,7 +31,9 @@ func (ch *cpuHandler) populateValueList(cpuTime uint64, vl *api.ValueList) {
 
 	systemTime := uint64(time.Now().UnixNano())
 
+	vl.Plugin = fmt.Sprintf("%s_cpu", vl.Plugin) //TODO: put cpu in dsname after bug in library fixed
 	vl.Identifier.Type = "percent"
+	vl.DSNames = []string{"cpu"}
 
 	var cpuPercent float64
 	cpuDelta := float64(cpuTime - ch.prevStats[vl.PluginInstance].cpuTime)

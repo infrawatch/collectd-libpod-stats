@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"collectd.org/api"
@@ -31,9 +30,8 @@ func (ch *cpuHandler) populateValueList(cpuTime uint64, vl *api.ValueList) {
 
 	systemTime := uint64(time.Now().UnixNano())
 
-	vl.Plugin = fmt.Sprintf("%s_cpu", vl.Plugin) //TODO: put cpu in dsname after bug in library fixed
-	vl.Identifier.Type = "percent"
-	vl.DSNames = []string{"cpu"}
+	vl.Identifier.Type = "pod_cpu"
+	vl.DSNames = []string{"percent", "time"}
 
 	var cpuPercent float64
 	cpuDelta := float64(cpuTime - ch.prevStats[vl.PluginInstance].cpuTime)
@@ -48,7 +46,7 @@ func (ch *cpuHandler) populateValueList(cpuTime uint64, vl *api.ValueList) {
 		cpuTime:    cpuTime,
 	}
 
-	vl.Values = []api.Value{api.Gauge(cpuPercent)}
+	vl.Values = []api.Value{api.Gauge(cpuPercent), api.Derive(cpuTime)}
 }
 
 //memoryHandler stat gathering and formatting for memory cgroup
@@ -56,6 +54,6 @@ type memoryHandler struct{}
 
 //populateValueList places stats related to memory handler in in vl
 func (mh *memoryHandler) populateValueList(memStat uint64, vl *api.ValueList) {
-	vl.Identifier.Type = "memory"
+	vl.Identifier.Type = "pod_memory"
 	vl.Values = []api.Value{api.Gauge(memStat)}
 }

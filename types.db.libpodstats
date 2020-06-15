@@ -1,0 +1,2 @@
+pod_cpu    percent:GAUGE:0:100.1, time:DERIVE:0:U
+pod_memory value:GAUGE:0:281474976710656

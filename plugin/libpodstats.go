@@ -6,32 +6,13 @@ import (
 	"time"
 
 	"collectd.org/api"
-	"collectd.org/config"
 	"collectd.org/exec"
 	"collectd.org/plugin"
 	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
 	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
 )
 
-type Configuration struct {
-}
-
-func (Configuration) Configure(ctx context.Context, block config.Block) error {
-	fmt.Println("called configuration function")
-	// configMap := make(map[string]interface{})
-	// err := block.Unmarshal(&configMap)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println("configmap: ")
-	// fmt.Println(configMap)
-	// for key, val := range configMap {
-	// 	fmt.Printf("%s:%s\n", key, val)
-	// }
-	return nil
-}
-
-// LibpodStats gather container stats from podman
+// LibpodStats gathers container resource usage stats from libpod cgroups
 type LibpodStats struct {
 	handlers map[cgroups.ControlType]handler
 }

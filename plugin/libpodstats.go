@@ -59,3 +59,9 @@ func (ls *LibpodStats) Read(ctx context.Context) error {
 	}
 	return nil
 }
+
+func init() {
+	plugin.RegisterRead("libpodstats", NewLibpodStats())
+}
+
+func main() {}

@@ -22,9 +22,6 @@ import (
 const (
 	//container path relative to user
 	relativeContainersPath string = "containers/storage/overlay-containers/containers.json"
-
-	//libpod cgroup name template
-	containerCgroupTemplate string = "libpod-%s.scope"
 )
 
 //MetricMatrix holds stats for each container according to
@@ -33,6 +30,12 @@ type MetricMatrix map[string]map[cgroups.ControlType]uint64
 
 //ContainersStats retrieves stats in specified cgroup controllers for all containers on host
 func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error) {
+	cgroup2, err := cgroups.IsCgroup2UnifiedMode()
+	if err != nil {
+		return nil, errors.Wrapf(err, "determing cgroup version")
+	}
+	uid := os.Geteuid()
+
 	retMatrix := MetricMatrix{}
 
 	cMap, err := getContainers()
@@ -43,7 +46,7 @@ func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error
 	for cLabel, c := range cMap {
 		retMatrix[cLabel] = map[cgroups.ControlType]uint64{}
 		for _, control := range cgroupControls {
-			ctrlPath, err := genContainerCgroupPath(control, c.ID)
+			ctrlPath, err := genContainerCgroupPath(control, c.ID, cgroup2, uid)
 			if err != nil {
 				return nil, err
 			}
@@ -54,7 +57,7 @@ func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error
 			}
 
 			stat, err := cgCtrl.Stats()
-			if err != nil {
+			if err != nil && err != cgroups.ErrDoesNotExist {
 				return nil, err
 			}
 
@@ -103,29 +106,24 @@ func getContainers() (map[string]*containers.Container, error) {
 	return containerMap, nil
 }
 
-func genContainerCgroupPath(ctype cgroups.ControlType, id string) (string, error) {
-	cgroup2, err := cgroups.IsCgroup2UnifiedMode()
-	if err != nil {
-		return "", errors.Wrapf(err, "determing cgroup version")
-	}
+func genContainerCgroupPath(ctype cgroups.ControlType, id string, cgroup2 bool, uid int) (string, error) {
 
+	path, err := filepath.Abs("/sys/fs/cgroup")
 	if err != nil {
 		return "", errors.Wrapf(err, "retrieving cgroup root path")
 	}
-	path, err := filepath.Abs("/sys/fs/cgroup")
 
-	if !cgroup2 {
-		path = filepath.Join(path, ctype.String())
-	}
-
-	uid := os.Geteuid()
-	if uid != 0 {
-		if !cgroup2 {
+	if cgroup2 {
+		if uid != 0 {
+			path = filepath.Join(path, fmt.Sprintf("user.slice/user-%d.slice/user@%d.service/user.slice/libpod-%s.scope", uid, uid, id))
+		} else {
+			path = filepath.Join(path, fmt.Sprintf("machine.slice/libpod-%s.scope", id))
+		}
+	} else {
+		if uid != 0 {
 			return "", fmt.Errorf("rootless cgroups require Cgroups V2")
 		}
-		path = filepath.Join(path, fmt.Sprintf("user.slice/user-%d.slice/user@%d.service/user.slice", uid, uid))
+		path = filepath.Join(path, fmt.Sprintf("%s/machine.slice/libpod-%s.scope", ctype.String(), id))
 	}
-
-	path = filepath.Join(path, fmt.Sprintf(containerCgroupTemplate, id))
 	return path, nil
 }

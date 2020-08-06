@@ -17,6 +17,7 @@ const (
 
 var (
 	ErrUndefinedController error = errors.New("undefined controller type")
+	ErrDoesNotExist        error = errors.New("cgroup does not exist")
 )
 
 //ControlType supported cgroup controller types

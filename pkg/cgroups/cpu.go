@@ -39,7 +39,7 @@ func (ca *CPUAcct) Stats() (uint64, error) {
 func (ca *CPUAcct) statsV1() (uint64, error) {
 	res, err := readFileAsUint64(filepath.Join(ca.path, "cpuacct.usage"))
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving cpu stats cgroup v1")
+		return 0, ErrDoesNotExist
 	}
 	return res, nil
 }
@@ -49,7 +49,7 @@ func (ca *CPUAcct) statsV2() (uint64, error) {
 
 	values, err := readCgroup2MapPath(p)
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving cpu stats cgroup v2")
+		return 0, ErrDoesNotExist
 	}
 
 	var total uint64

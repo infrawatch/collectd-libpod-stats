@@ -40,7 +40,7 @@ func (m *Memory) Stats() (uint64, error) {
 func (m *Memory) statsV1() (uint64, error) {
 	res, err := readFileAsUint64(filepath.Join(m.path, "memory.usage_in_bytes"))
 	if err != nil {
-		return 0, errors.Wrapf(err, "retrieving memory stats cgroup v1")
+		return 0, ErrDoesNotExist
 	}
 	return res, nil
 }
@@ -50,7 +50,7 @@ func (m *Memory) statsV2() (uint64, error) {
 
 	stat, err := ioutil.ReadFile(p)
 	if err != nil {
-		return 0, err
+		return 0, ErrDoesNotExist
 	}
 
 	ret, err := strconv.Atoi(strings.TrimSpace(string(stat)))

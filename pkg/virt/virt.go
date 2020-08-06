@@ -57,11 +57,13 @@ func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error
 			}
 
 			stat, err := cgCtrl.Stats()
-			if err != nil {
+			if err != nil && err != cgroups.ErrDoesNotExist {
 				return nil, err
 			}
 
-			retMatrix[cLabel][control] = stat
+			if err != cgroups.ErrDoesNotExist {
+				retMatrix[cLabel][control] = stat
+			}
 		}
 	}
 	return retMatrix, nil

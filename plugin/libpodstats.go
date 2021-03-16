@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"collectd.org/api"
-	"collectd.org/exec"
 	"collectd.org/plugin"
 	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
 	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
@@ -39,7 +38,6 @@ func (ls *LibpodStats) Read(ctx context.Context) error {
 		for controlType, stat := range metric {
 			vl := &api.ValueList{
 				Identifier: api.Identifier{
-					Host:           exec.Hostname(),
 					Plugin:         "libpodstats",
 					PluginInstance: cLabel,
 				},

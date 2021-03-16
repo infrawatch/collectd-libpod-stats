@@ -8,7 +8,6 @@ import (
 	"collectd.org/api"
 	"collectd.org/plugin"
 	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
-	"github.com/pleimer/collectd-libpod-stats/pkg/host"
 	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
 )
 
@@ -61,7 +60,6 @@ func (ls *LibpodStats) Read(ctx context.Context) error {
 
 func init() {
 	plugin.RegisterRead("libpodstats", NewLibpodStats())
-	host.GlobalHostname()
 }
 
 func main() {}

@@ -13,6 +13,7 @@ type handler interface {
 type pair struct {
 	systemTime uint64
 	cpuTime    uint64
+	cpuPercent float64
 }
 
 //cpuHandler stat gathering and formatting for cpu cgroup
@@ -34,16 +35,20 @@ func (ch *cpuHandler) populateValueList(cpuTime uint64, vl *api.ValueList) {
 	vl.DSNames = []string{"percent", "time"}
 
 	var cpuPercent float64
-	cpuDelta := float64(cpuTime - ch.prevStats[vl.PluginInstance].cpuTime)
-	systemDelta := float64((systemTime - ch.prevStats[vl.PluginInstance].systemTime))
+	cpuDelta := float64(cpuTime) - float64(ch.prevStats[vl.PluginInstance].cpuTime)
+	systemDelta := float64(systemTime) - float64(ch.prevStats[vl.PluginInstance].systemTime)
 
+	// in the case of a negative value such as a counter rollover, just use the last calculation
 	if cpuDelta > 0.0 && systemDelta > 0.0 && ch.prevStats[vl.PluginInstance] != (pair{}) {
 		cpuPercent = (cpuDelta / systemDelta) * 100.0
+	} else {
+		cpuPercent = ch.prevStats[vl.PluginInstance].cpuPercent
 	}
 
 	ch.prevStats[vl.PluginInstance] = pair{
 		systemTime: systemTime,
 		cpuTime:    cpuTime,
+		cpuPercent: cpuPercent,
 	}
 
 	vl.Values = []api.Value{api.Gauge(cpuPercent), api.Derive(cpuTime)}

@@ -1,6 +1,6 @@
 module github.com/pleimer/collectd-libpod-stats
 
-go 1.14
+go 1.16
 
 require (
 	collectd.org v0.5.0

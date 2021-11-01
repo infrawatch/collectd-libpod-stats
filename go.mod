@@ -1,4 +1,4 @@
-module github.com/pleimer/collectd-libpod-stats
+module github.com/infrawatch/collectd-libpod-stats
 
 go 1.16
 

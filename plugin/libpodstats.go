@@ -7,8 +7,8 @@ import (
 
 	"collectd.org/api"
 	"collectd.org/plugin"
-	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
-	"github.com/pleimer/collectd-libpod-stats/pkg/virt"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/cgroups"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/virt"
 )
 
 // LibpodStats gathers container resource usage stats from libpod cgroups

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/pleimer/collectd-libpod-stats/pkg/assert"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/assert"
 )
 
 func TestListCreation(t *testing.T) {

@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
-	"github.com/pleimer/collectd-libpod-stats/pkg/containers"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/cgroups"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/containers"
 )
 
 const (

@@ -3,8 +3,8 @@ package virt
 import (
 	"testing"
 
-	"github.com/pleimer/collectd-libpod-stats/pkg/assert"
-	"github.com/pleimer/collectd-libpod-stats/pkg/cgroups"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/assert"
+	"github.com/infrawatch/collectd-libpod-stats/pkg/cgroups"
 )
 
 type userPaths struct {

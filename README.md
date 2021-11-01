@@ -31,7 +31,7 @@ export COLLECTD_SRC="/path/to/collectd/source"
 export CGO_CPPFLAGS="-I${COLLECTD_SRC}/src/daemon -I${COLLECTD_SRC}/src"
 
 
-git clone https://github.com/pleimer/collectd-libpod-stats.git
+git clone https://github.com/infrawatch/collectd-libpod-stats.git
 cd collectd-libpod-stats/plugin
 go build -buildmode=c-shared -o libpodstats.so
 ```

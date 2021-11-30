@@ -4,7 +4,7 @@ Collectd plugin for gathering resource usage statistics from containers created 
 ## Functionality
 This plugin is being developed with the new [go-collectd](https://github.com/collectd/go-collectd) library which has not yet released version 1. As a result, the functionality of this project is bound by the ever changing abilities of the library. Many features that would be expected from a plugin cannot yet be implemented until the library makes it possible to do so.
 
-As of now, this plugin reports the following for each container on a node:
+Right now, this plugin reports the following for each container on a node:
 
 Resource | Units
 ---------- | ----------
@@ -15,11 +15,11 @@ memory usage | bytes
 There is no way to configure these options.
 
 ## Notes on memory usage calculations
-Calculating memory usage on linux systems is hairy and differs based on projects. This plugin replicates the memory calculation that the podman tool uses, that is, the value of `memory.usage_in_bytes` in the case of cgroups v1 or `memory.current` for cgroups v2. This value includes both RSS and CACHE memory values and thus is different to what the `free` tool reports as used memory by reading `/proc/meminfo`.
+Calculating memory usage on linux systems is hairy; not all projects do it the same way. This plugin replicates the memory calculation that the podman tool provides, using the value of `memory.usage_in_bytes` for cgroups v1 or `memory.current` for cgroups v2. This value includes both RSS and CACHE memory and is different to the value returned by the `free` tool, which calculates used memory by reading `/proc/meminfo`.
 
-Kubernetes calulates the memory usage as `memory.usage_in_bytes - total_inactive_file` [(source)](https://github.com/kubernetes/kubernetes/blob/dde6e8e7465468c32642659cb708a5cc922add64/test/e2e/node/node_problem_detector.go#L242). Kubernetes uses this value to make [eviction decisions](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals) and thus this value is important. However, k8s provides its own means of monitoring pod memory and should be used instead of this plugin.
+Kubernetes calulates the memory usage as `memory.usage_in_bytes - total_inactive_file` [(source)](https://github.com/kubernetes/kubernetes/blob/dde6e8e7465468c32642659cb708a5cc922add64/test/e2e/node/node_problem_detector.go#L242). K8s uses the value to make [eviction decisions](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals). Because k8s provides its own meanss of monitoring pod memory and calculates usage differently than this plugin and the `free` tool, this plugin should not be used to monitor pods in a k8s cluster.
 
-Ultimately, this plugin uses the stated values because the linux cgroup oom_killer uses this value to destroy processes that exceed the hard limit.
+Ultimately, the stated values are used here because the linux cgroup oom_killer uses this value to destroy processes that exceed the hard limit.
 
 ## Build from source
 

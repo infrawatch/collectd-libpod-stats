@@ -30,24 +30,24 @@ var testPathMatrix cgrps = cgrps{
 
 func TestCgroupPath(t *testing.T) {
 	t.Run("root cgroup v1", func(t *testing.T) {
-		path, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", false, 0)
+		path, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", false, 0, "collectd")
 		assert.Ok(t, err)
 		assert.Equals(t, testPathMatrix.version1.root, path)
 	})
 
 	t.Run("nonroot cgroup v1", func(t *testing.T) {
-		_, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", false, 1000)
+		_, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", false, 1000, "collectd")
 		assert.Assert(t, err != nil, "path generation should fail for cgroups v1 rootless")
 	})
 
 	t.Run("root cgroup v2", func(t *testing.T) {
-		path, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", true, 0)
+		path, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", true, 0, "collectd")
 		assert.Ok(t, err)
 		assert.Equals(t, testPathMatrix.version2.root, path)
 	})
 
 	t.Run("nonroot cgroup v2", func(t *testing.T) {
-		path, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", true, 1000)
+		path, err := genContainerCgroupPath(cgroups.CPUAcctT, "123abc", true, 1000, "collectd")
 		assert.Ok(t, err)
 		assert.Equals(t, testPathMatrix.version2.nonroot, path)
 	})

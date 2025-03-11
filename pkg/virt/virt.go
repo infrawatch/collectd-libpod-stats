@@ -15,22 +15,22 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/infrawatch/collectd-libpod-stats/pkg/cgroups"
 	"github.com/infrawatch/collectd-libpod-stats/pkg/containers"
+	"github.com/pkg/errors"
 )
 
 const (
 	//container path relative to user
-	relativeContainersPath string = "containers/storage/overlay-containers/containers.json"
+	relativeContainersPath         string = "containers/storage/overlay-containers/containers.json"
 	relativeVolatileContainersPath string = "containers/storage/overlay-containers/volatile-containers.json"
 )
 
-//MetricMatrix holds stats for each container according to
-//control type. Usage is: map[container label]map[control type]data
+// MetricMatrix holds stats for each container according to
+// control type. Usage is: map[container label]map[control type]data
 type MetricMatrix map[string]map[cgroups.ControlType]uint64
 
-//ContainersStats retrieves stats in specified cgroup controllers for all containers on host
+// ContainersStats retrieves stats in specified cgroup controllers for all containers on host
 func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error) {
 	cgroup2, err := cgroups.IsCgroup2UnifiedMode()
 	if err != nil {
@@ -71,7 +71,7 @@ func ContainersStats(cgroupControls ...cgroups.ControlType) (MetricMatrix, error
 	return retMatrix, nil
 }
 
-//getContainers returns map with containers created on host indexed by name
+// getContainers returns map with containers created on host indexed by name
 func getContainers() (map[string]*containers.Container, error) {
 	/*
 		libpod stores container related information in one of two places:
@@ -173,9 +173,14 @@ func genContainerCgroupPath(ctype cgroups.ControlType, id string, cgroup2 bool, 
 					node_hostname = strings.Split(node_hostname, ".")[0]
 
 					// from `container_name` get the name of the ceph service for which cgroup path is to be found
-					ceph_service_name := strings.Split(container_name, node_hostname)[0]
-					ceph_service_name = strings.Trim(ceph_service_name, "-")
-					ceph_service_name = strings.SplitAfter(ceph_service_name, fmt.Sprintf("ceph-%s-", ceph_fsid))[1]
+					if strings.Contains(container_name, node_hostname) {
+						container_name = strings.Split(container_name, node_hostname)[0]
+					}
+
+					if strings.Contains(container_name, fmt.Sprintf("ceph-%s", ceph_fsid)) {
+						container_name = strings.Split(container_name, fmt.Sprintf("ceph-%s", ceph_fsid))[1]
+					}
+					ceph_service_name := strings.Trim(container_name, "-")
 
 					/*
 						Find out the directory starting with the prefix "ceph-<FSID>-" corresponding to `ceph_service_name`
